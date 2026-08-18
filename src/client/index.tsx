@@ -67,6 +67,7 @@ function PendingCommentsDock({ sessionId, inputActions, useInput }: PendingComme
   const comments = state.bySession[sessionKey(sessionId)] ?? []
   const input = useInput((snapshot) => snapshot)
   const [detailsOpen, setDetailsOpen] = useState(false)
+  const dockRef = useRef<HTMLDivElement>(null)
   const commentsRef = useRef(comments)
   const inputRef = useRef(input)
   commentsRef.current = comments
@@ -75,6 +76,17 @@ function PendingCommentsDock({ sessionId, inputActions, useInput }: PendingComme
   useEffect(() => {
     if (comments.length === 0) setDetailsOpen(false)
   }, [comments.length])
+
+  useEffect(() => {
+    if (!detailsOpen) return
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      const target = event.target
+      if (target instanceof Node && dockRef.current?.contains(target)) return
+      setDetailsOpen(false)
+    }
+    document.addEventListener('pointerdown', closeOnOutsidePointer, true)
+    return () => document.removeEventListener('pointerdown', closeOnOutsidePointer, true)
+  }, [detailsOpen])
 
   const prepareSubmission = useCallback((): boolean => {
     const currentComments = commentsRef.current
@@ -117,7 +129,7 @@ function PendingCommentsDock({ sessionId, inputActions, useInput }: PendingComme
   const chinese = isChinese()
 
   return (
-    <div className="dqt-dock">
+    <div ref={dockRef} className="dqt-dock">
       {detailsOpen ? (
         <div className="dqt-details" role="dialog" aria-label={chinese ? '待发送评论' : 'Pending comments'}>
           {comments.map((comment, index) => (
