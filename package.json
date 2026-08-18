@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-quote-to-chat",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Codex-style selection quoting for DeepSeek Harness: select assistant text and add each quote separately to the current conversation draft.",
   "type": "module",
   "main": "./dist/index.js",

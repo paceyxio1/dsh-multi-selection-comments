@@ -7,11 +7,23 @@ export interface SelectionComment {
 const START_MARKER = '<selection_comments>'
 const END_MARKER = '</selection_comments>'
 
+export interface ParsedSubmission {
+  comments: SelectionComment[]
+  body: string
+}
+
 function escapeXml(value: string): string {
   return value
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
+}
+
+function unescapeXml(value: string): string {
+  return value
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>')
+    .replaceAll('&amp;', '&')
 }
 
 /** Serialize pending UI comments only at submit time, leaving the visible draft clean. */
@@ -25,6 +37,28 @@ export function composeSubmission(draft: string, comments: readonly SelectionCom
   ].join('\n'))
   const context = [START_MARKER, ...rows, END_MARKER].join('\n')
   return draft.trim() ? `${context}\n\n${draft.trimEnd()}` : context
+}
+
+/** Parse this plugin's model-facing envelope back into presentation data. */
+export function parseSubmission(value: string): ParsedSubmission | null {
+  const start = value.indexOf(START_MARKER)
+  const end = value.indexOf(END_MARKER, start + START_MARKER.length)
+  if (start < 0 || end < 0 || value.slice(0, start).trim()) return null
+  const envelope = value.slice(start + START_MARKER.length, end)
+  const comments: SelectionComment[] = []
+  const pattern = /<comment\s+index="(\d+)">\s*<selected_text>([\s\S]*?)<\/selected_text>\s*<user_comment>([\s\S]*?)<\/user_comment>\s*<\/comment>/g
+  for (const match of envelope.matchAll(pattern)) {
+    comments.push({
+      id: `sent-${match[1] ?? comments.length + 1}`,
+      selectedText: unescapeXml(match[2] ?? '').trim(),
+      userComment: unescapeXml(match[3] ?? '').trim(),
+    })
+  }
+  if (comments.length === 0) return null
+  return {
+    comments,
+    body: value.slice(end + END_MARKER.length).trimStart(),
+  }
 }
 
 export function commentCountLabel(count: number, chinese: boolean): string {
