@@ -10,11 +10,11 @@
 
 ### 为一段选中文字添加后续要求
 
-![为一段选中文字添加后续要求](docs/images/add-selection-comment.png)
+<img src="docs/images/add-selection-comment.png" alt="为一段选中文字添加后续要求" width="420">
 
 ### 集中查看多条独立要求
 
-![在输入框上方集中查看多条独立要求](docs/images/multiple-independent-comments.png)
+<img src="docs/images/multiple-independent-comments.png" alt="在输入框上方集中查看多条独立要求" width="680">
 
 ## 功能特点
 

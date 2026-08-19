@@ -10,11 +10,11 @@ Select several passages from assistant responses or tool output, write a separat
 
 ### Comment on one selected passage
 
-![Add an independent comment to selected text](docs/images/add-selection-comment.png)
+<img src="docs/images/add-selection-comment.png" alt="Add an independent comment to selected text" width="420">
 
 ### Review multiple independent comments
 
-![Review multiple independent comments above the composer](docs/images/multiple-independent-comments.png)
+<img src="docs/images/multiple-independent-comments.png" alt="Review multiple independent comments above the composer" width="680">
 
 ## Features
 
