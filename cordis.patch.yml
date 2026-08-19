@@ -1,0 +1,5 @@
+# dsh-plugin-multi-selection-comments bundle patch.
+# Registers the client bundle when DSH installs this repository as a managed plugin.
+- insert:
+    - id: multi-selection-comments
+      name: dsh-plugin-multi-selection-comments

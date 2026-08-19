@@ -1,5 +1,5 @@
 // src/server/index.ts
-var name = "quote-to-chat";
+var name = "multi-selection-comments";
 function apply() {
 }
 export {

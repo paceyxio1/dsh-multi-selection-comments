@@ -1,6 +1,6 @@
 {
-  "name": "dsh-plugin-quote-to-chat",
-  "version": "0.3.0",
+  "name": "dsh-plugin-multi-selection-comments",
+  "version": "0.4.0",
   "description": "Codex-style multiple independent selection comments for DeepSeek Harness (DSH).",
   "type": "module",
   "main": "./dist/index.js",
@@ -12,6 +12,7 @@
   "files": [
     "dist",
     "client.js",
+    "cordis.patch.yml",
     "README.md",
     "README_EN.md",
     "docs/images",
@@ -19,6 +20,9 @@
     "install.ps1"
   ],
   "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
     "client": {
       "platform": "web",
       "inject": [

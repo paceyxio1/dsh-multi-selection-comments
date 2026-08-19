@@ -6,11 +6,11 @@ import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ChatNodeViewProps } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import { commentCountLabel, composeSubmission, parseSubmission, type SelectionComment } from './comment-format.ts'
 
-export const name = 'quote-to-chat'
+export const name = 'multi-selection-comments'
 export const inject = ['sessions', 'slots']
 
-const POPUP_CLASS = 'dsh-quote-to-chat-popup'
-const STYLE_ID = 'dsh-plugin-quote-to-chat/style'
+const POPUP_CLASS = 'dsh-multi-selection-comments-popup'
+const STYLE_ID = 'dsh-plugin-multi-selection-comments/style'
 
 interface PendingState {
   bySession: Record<string, SelectionComment[]>
@@ -379,12 +379,12 @@ function installSelectionAction(ctx: ClientContext): () => void {
 }
 
 export function apply(ctx: ClientContext): void {
-  ctx.effect(() => installSelectionAction(ctx), 'quote-to-chat: selection comments')
+  ctx.effect(() => installSelectionAction(ctx), 'multi-selection-comments: selection comments')
   ctx.slots.inject('conversation.input.dock', () =>
     ctx.slots.register(
       {
         name: 'conversation.input.dock',
-        id: 'quote-to-chat-comments-dock',
+        id: 'multi-selection-comments-dock',
         order: 19,
       },
       PendingCommentsDock,

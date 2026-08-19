@@ -52,10 +52,12 @@ dsh web
 验证插件已经进入 DSH 实际加载配置：
 
 ```powershell
-dsh --profile web --dump-config | Select-String dsh-plugin-quote-to-chat
+dsh --profile web --dump-config | Select-String dsh-plugin-multi-selection-comments
 ```
 
 如果页面仍显示旧版本，请强制刷新浏览器缓存。
+
+从旧版 `dsh-plugin-quote-to-chat` 升级时，请先在 DSH 插件管理器中卸载旧插件，再安装本仓库，避免两个客户端模块同时加载。
 
 ## 使用方法
 

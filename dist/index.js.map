@@ -1,7 +1,7 @@
 {
   "version": 3,
   "sources": ["../src/server/index.ts"],
-  "sourcesContent": ["/** This plugin is client-only; DSH still loads this no-op Cordis entry. */\nexport const name = 'quote-to-chat'\n\nexport function apply(): void {}\n"],
+  "sourcesContent": ["/** This plugin is client-only; DSH still loads this no-op Cordis entry. */\nexport const name = 'multi-selection-comments'\n\nexport function apply(): void {}\n"],
   "mappings": ";AACO,IAAM,OAAO;AAEb,SAAS,QAAc;AAAC;",
   "names": []
 }

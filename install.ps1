@@ -1,7 +1,8 @@
 $ErrorActionPreference = 'Stop'
 
-$PluginName = 'dsh-plugin-quote-to-chat'
-$PluginId = 'quote-to-chat'
+$PluginName = 'dsh-plugin-multi-selection-comments'
+$PluginId = 'multi-selection-comments'
+$LegacyPluginName = 'dsh-plugin-quote-to-chat'
 $PluginDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $DshHomePath = if ($env:DSH_HOME) { $env:DSH_HOME } else { Join-Path ([Environment]::GetFolderPath('UserProfile')) '.dsh' }
 $ProfileModules = Join-Path $DshHomePath 'profiles\node_modules'
@@ -31,9 +32,30 @@ if (Test-Path -LiteralPath $TargetPath) {
 }
 New-Item -ItemType Junction -Path $TargetPath -Target $PluginDir | Out-Null
 
+$LegacyTargetPath = Join-Path $ProfileModules $LegacyPluginName
+if (Test-Path -LiteralPath $LegacyTargetPath) {
+  $LegacyTargetItem = Get-Item -LiteralPath $LegacyTargetPath -Force
+  if ($LegacyTargetItem.LinkType) {
+    Remove-Item -LiteralPath $LegacyTargetPath -Force
+  } else {
+    Write-Warning "$LegacyTargetPath still exists and is not a link. Remove the legacy plugin manually."
+  }
+}
+
 New-Item -ItemType Directory -Force -Path (Split-Path $PatchPath) | Out-Null
 if (-not (Test-Path -LiteralPath $PatchPath)) {
   [System.IO.File]::WriteAllText($PatchPath, "[]`r`n", [System.Text.UTF8Encoding]::new($false))
+}
+
+$LegacyEntryPattern = '(?ms)(?:^# dsh-plugin-quote-to-chat \(added by install\.ps1\)\r?\n)?^- insert:\r?\n    - id: quote-to-chat\r?\n      name: dsh-plugin-quote-to-chat\r?\n?'
+$PatchText = [System.IO.File]::ReadAllText($PatchPath)
+$MigratedPatchText = [regex]::Replace($PatchText, $LegacyEntryPattern, '')
+if ($MigratedPatchText -ne $PatchText) {
+  $RemainingLines = @($MigratedPatchText -split '\r?\n' | Where-Object { $_.Trim() -and -not $_.TrimStart().StartsWith('#') })
+  if ($RemainingLines.Count -eq 0) {
+    $MigratedPatchText = "[]`r`n"
+  }
+  [System.IO.File]::WriteAllText($PatchPath, $MigratedPatchText, [System.Text.UTF8Encoding]::new($false))
 }
 
 if (-not (Select-String -LiteralPath $PatchPath -Pattern "name: $PluginName" -Quiet)) {

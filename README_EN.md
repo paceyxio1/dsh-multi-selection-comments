@@ -52,10 +52,12 @@ dsh web
 Verify that the plugin is present in DSH's effective configuration:
 
 ```powershell
-dsh --profile web --dump-config | Select-String dsh-plugin-quote-to-chat
+dsh --profile web --dump-config | Select-String dsh-plugin-multi-selection-comments
 ```
 
 If the page still shows an older version, perform a hard refresh to clear the browser cache.
+
+When upgrading from `dsh-plugin-quote-to-chat`, uninstall the legacy plugin in DSH's plugin manager before installing this repository so both client modules are not loaded together.
 
 ## Usage
 

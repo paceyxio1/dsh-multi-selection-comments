@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)))
-const packageName = 'dsh-plugin-quote-to-chat'
+const packageName = 'dsh-plugin-multi-selection-comments'
 
 mkdirSync(join(root, 'dist'), { recursive: true })
 await build({
