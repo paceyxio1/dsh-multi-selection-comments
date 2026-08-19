@@ -62,6 +62,6 @@ export function parseSubmission(value: string): ParsedSubmission | null {
 }
 
 export function commentCountLabel(count: number, chinese: boolean): string {
-  if (chinese) return `${count} 条评论`
+  if (chinese) return `${count} 条选中内容`
   return `${count} comment${count === 1 ? '' : 's'}`
 }

@@ -112,7 +112,7 @@ function SentAnnotations({ comments }: { comments: readonly SelectionComment[] }
               <div>
                 <div className="dqt-detail-label">{chinese ? '所选文本：' : 'Selected text:'}</div>
                 <div className="dqt-detail-text">{comment.selectedText}</div>
-                <div className="dqt-detail-label dqt-comment-label">{chinese ? '用户评论：' : 'User comment:'}</div>
+                <div className="dqt-detail-label dqt-comment-label">{chinese ? '你的要求：' : 'User comment:'}</div>
                 <div className="dqt-detail-text">{comment.userComment}</div>
               </div>
             </div>
@@ -121,7 +121,7 @@ function SentAnnotations({ comments }: { comments: readonly SelectionComment[] }
       ) : null}
       <button type="button" className="dqt-sent-chip" onClick={() => setOpen((value) => !value)} aria-expanded={open}>
         <CommentIcon />
-        <span>{chinese ? `${comments.length} 条注释` : `${comments.length} annotation${comments.length === 1 ? '' : 's'}`}</span>
+        <span>{chinese ? `${comments.length} 条选中内容` : `${comments.length} annotation${comments.length === 1 ? '' : 's'}`}</span>
       </button>
     </div>
   )
@@ -230,17 +230,17 @@ function PendingCommentsDock({ sessionId, inputActions, useInput }: PendingComme
   return (
     <div ref={dockRef} className="dqt-dock">
       {detailsOpen ? (
-        <div className="dqt-details" role="dialog" aria-label={chinese ? '待发送评论' : 'Pending comments'}>
+        <div className="dqt-details" role="dialog" aria-label={chinese ? '待发送的选中内容' : 'Pending comments'}>
           {comments.map((comment, index) => (
             <div className="dqt-detail-row" key={comment.id}>
               <span className="dqt-detail-index">{index + 1}.</span>
               <div className="dqt-detail-body">
                 <div className="dqt-detail-label">{chinese ? '所选文本：' : 'Selected text:'}</div>
                 <div className="dqt-detail-text">{comment.selectedText}</div>
-                <div className="dqt-detail-label dqt-comment-label">{chinese ? '用户评论：' : 'User comment:'}</div>
+                <div className="dqt-detail-label dqt-comment-label">{chinese ? '你的要求：' : 'User comment:'}</div>
                 <div className="dqt-detail-text">{comment.userComment}</div>
               </div>
-              <button type="button" className="dqt-remove-one" onClick={() => removePendingComment(sessionId, comment.id)} aria-label={chinese ? '删除这条评论' : 'Remove comment'}>×</button>
+              <button type="button" className="dqt-remove-one" onClick={() => removePendingComment(sessionId, comment.id)} aria-label={chinese ? '删除这条选中内容' : 'Remove comment'}>×</button>
             </div>
           ))}
         </div>
@@ -250,7 +250,7 @@ function PendingCommentsDock({ sessionId, inputActions, useInput }: PendingComme
           <CommentIcon />
           <span>{commentCountLabel(comments.length, chinese)}</span>
         </button>
-        <button type="button" className="dqt-chip-clear" onClick={() => clearPendingComments(sessionId)} aria-label={chinese ? '清空评论' : 'Clear comments'}>×</button>
+        <button type="button" className="dqt-chip-clear" onClick={() => clearPendingComments(sessionId)} aria-label={chinese ? '清空选中内容' : 'Clear comments'}>×</button>
       </div>
     </div>
   )
@@ -315,10 +315,10 @@ function installSelectionAction(ctx: ClientContext): () => void {
     selected.textContent = text
     const commentLabel = document.createElement('div')
     commentLabel.className = 'dqt-popup-label'
-    commentLabel.textContent = chinese ? '用户评论：' : 'User comment:'
+    commentLabel.textContent = chinese ? '你的要求：' : 'User comment:'
     const input = document.createElement('textarea')
     input.className = 'dqt-popup-input'
-    input.placeholder = chinese ? '输入针对这段文字的评论' : 'Comment on this selection'
+    input.placeholder = chinese ? '输入对ai的后续要求' : 'Comment on this selection'
     const actions = document.createElement('div')
     actions.className = 'dqt-popup-actions'
     const cancel = document.createElement('button')
