@@ -4,7 +4,15 @@ import { createSnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
 import type { SessionId } from '@deepseek-ai/dsh-api-remotes/client'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ChatNodeViewProps } from '@deepseek-ai/dsh-client-ui-conversation/client'
-import { commentCountLabel, composeSubmission, parseSubmission, type SelectionComment } from './comment-format.ts'
+import {
+  commentCountLabel,
+  composeSubmission,
+  ensureEmptyDraftSentinel,
+  EMPTY_DRAFT_SENTINEL,
+  parseSubmission,
+  stripEmptyDraftSentinel,
+  type SelectionComment,
+} from './comment-format.ts'
 
 export const name = 'multi-selection-comments'
 export const inject = ['sessions', 'slots']
@@ -176,6 +184,19 @@ function PendingCommentsDock({ sessionId, inputActions, useInput }: PendingComme
     if (comments.length === 0) setDetailsOpen(false)
   }, [comments.length])
 
+  // DSH disables its native Send control when draft.trim() is empty. Keep one
+  // invisible UI-only character while selections are pending, then remove it
+  // as soon as the pending list is cleared.
+  useEffect(() => {
+    if (input.phase !== 'plain') return
+    const hasSentinel = input.draft.includes(EMPTY_DRAFT_SENTINEL)
+    if (comments.length > 0 && input.draft.trim() === '' && !hasSentinel) {
+      inputActions.setDraft(ensureEmptyDraftSentinel(input.draft))
+    } else if (comments.length === 0 && hasSentinel) {
+      inputActions.setDraft(stripEmptyDraftSentinel(input.draft))
+    }
+  }, [comments.length, input.draft, input.phase, inputActions])
+
   useEffect(() => {
     if (!detailsOpen) return
     const closeOnOutsidePointer = (event: PointerEvent) => {
@@ -191,7 +212,8 @@ function PendingCommentsDock({ sessionId, inputActions, useInput }: PendingComme
     const currentComments = commentsRef.current
     const currentInput = inputRef.current
     if (currentComments.length === 0 || currentInput.phase !== 'plain') return false
-    inputActions.setDraft(composeSubmission(currentInput.draft, currentComments))
+    const visibleDraft = stripEmptyDraftSentinel(currentInput.draft)
+    inputActions.setDraft(composeSubmission(visibleDraft, currentComments))
     clearPendingComments(sessionId)
     return true
   }, [inputActions, sessionId])
@@ -333,7 +355,11 @@ function installSelectionAction(ctx: ClientContext): () => void {
     input.addEventListener('input', () => { add.disabled = !input.value.trim() })
     input.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') dismiss()
-      if (event.key === 'Enter' && (event.ctrlKey || event.metaKey) && input.value.trim()) add.click()
+      if (event.key !== 'Enter' || event.isComposing) return
+      if (event.ctrlKey || event.metaKey) return
+      event.preventDefault()
+      event.stopPropagation()
+      if (input.value.trim()) add.click()
     })
     cancel.addEventListener('click', dismiss)
     add.addEventListener('click', () => {
@@ -414,4 +440,10 @@ export function apply(ctx: ClientContext): void {
   )
 }
 
-export { commentCountLabel, composeSubmission, parseSubmission } from './comment-format.ts'
+export {
+  commentCountLabel,
+  composeSubmission,
+  ensureEmptyDraftSentinel,
+  parseSubmission,
+  stripEmptyDraftSentinel,
+} from './comment-format.ts'

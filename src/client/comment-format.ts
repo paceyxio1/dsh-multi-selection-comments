@@ -6,10 +6,21 @@ export interface SelectionComment {
 
 const START_MARKER = '<selection_comments>'
 const END_MARKER = '</selection_comments>'
+export const EMPTY_DRAFT_SENTINEL = '\u2063'
 
 export interface ParsedSubmission {
   comments: SelectionComment[]
   body: string
+}
+
+/** Keep DSH's native Send control active while the visible main draft is empty. */
+export function ensureEmptyDraftSentinel(draft: string): string {
+  return draft.includes(EMPTY_DRAFT_SENTINEL) ? draft : `${draft}${EMPTY_DRAFT_SENTINEL}`
+}
+
+/** Never expose the UI-only sentinel to the serialized message or model. */
+export function stripEmptyDraftSentinel(draft: string): string {
+  return draft.replace(EMPTY_DRAFT_SENTINEL, '')
 }
 
 function escapeXml(value: string): string {
