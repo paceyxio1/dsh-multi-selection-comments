@@ -23,6 +23,7 @@ Select several passages from assistant responses or tool output, write a separat
 - Keep the composer clean with a compact “N comments” capsule instead of stacked blockquotes.
 - Open the capsule to review or remove individual comments; click outside the panel to close it.
 - Press Enter to add a selection to the conversation; use Ctrl/Command+Enter for a newline.
+- The comment is optional, so selected text can be attached without an additional instruction.
 - Submit selections even when the main composer is otherwise empty.
 - Inject structured comment context only when the main message is submitted.
 - Render sent comments as a right-aligned annotation capsule instead of exposing raw XML.

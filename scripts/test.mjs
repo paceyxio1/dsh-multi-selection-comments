@@ -43,5 +43,12 @@ assert.equal(module.ensureEmptyDraftSentinel(activatedEmptyDraft), activatedEmpt
 const commentOnlySubmission = module.composeSubmission(module.stripEmptyDraftSentinel(activatedEmptyDraft), comments)
 assert.equal(commentOnlySubmission.includes(module.EMPTY_DRAFT_SENTINEL), false)
 assert.equal(module.parseSubmission(commentOnlySubmission).body, '')
+const optionalRequirement = module.composeSubmission('', [{ id: 'optional', selectedText: '只引用这段', userComment: '' }])
+assert.match(optionalRequirement, /<user_comment><\/user_comment>/)
+assert.deepEqual(module.parseSubmission(optionalRequirement).comments[0], {
+  id: 'sent-1',
+  selectedText: '只引用这段',
+  userComment: '',
+})
 
 console.log('selection comment formatting tests passed')

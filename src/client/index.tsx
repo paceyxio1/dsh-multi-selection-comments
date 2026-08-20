@@ -337,7 +337,7 @@ function installSelectionAction(ctx: ClientContext): () => void {
     selected.textContent = text
     const commentLabel = document.createElement('div')
     commentLabel.className = 'dqt-popup-label'
-    commentLabel.textContent = chinese ? '你的要求：' : 'User comment:'
+    commentLabel.textContent = chinese ? '你的要求（可选）：' : 'User comment (optional):'
     const input = document.createElement('textarea')
     input.className = 'dqt-popup-input'
     input.placeholder = chinese ? '输入对ai的后续要求' : 'Comment on this selection'
@@ -351,19 +351,16 @@ function installSelectionAction(ctx: ClientContext): () => void {
     add.type = 'button'
     add.className = 'dqt-popup-add'
     add.textContent = chinese ? '添加到对话' : 'Add to conversation'
-    add.disabled = true
-    input.addEventListener('input', () => { add.disabled = !input.value.trim() })
     input.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') dismiss()
       if (event.key !== 'Enter' || event.isComposing) return
       if (event.ctrlKey || event.metaKey) return
       event.preventDefault()
       event.stopPropagation()
-      if (input.value.trim()) add.click()
+      add.click()
     })
     cancel.addEventListener('click', dismiss)
     add.addEventListener('click', () => {
-      if (!input.value.trim()) return
       addPendingComment(sessionId, text, input.value)
       window.getSelection()?.removeAllRanges()
       dismiss()
