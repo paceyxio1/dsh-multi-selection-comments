@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import ts from 'typescript'
 
 const source = readFileSync(join(process.cwd(), 'src/client/comment-format.ts'), 'utf8')
+const clientSource = readFileSync(join(process.cwd(), 'src/client/index.tsx'), 'utf8')
 const js = ts.transpileModule(source, {
   compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
 }).outputText
@@ -50,5 +51,7 @@ assert.deepEqual(module.parseSubmission(optionalRequirement).comments[0], {
   selectedText: '只引用这段',
   userComment: '',
 })
+assert.match(clientSource, /key: 'user',[\s\S]*?priority: -100/)
+assert.match(clientSource, /key: 'steering',[\s\S]*?priority: -100/)
 
 console.log('selection comment formatting tests passed')
