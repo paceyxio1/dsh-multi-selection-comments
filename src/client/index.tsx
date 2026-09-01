@@ -419,7 +419,9 @@ export function apply(ctx: ClientContext): void {
         {
           name: 'conversation.chat.node',
           key: 'user',
-          priority: -1,
+          // DSH's built-in user renderer now wins over the old -1 priority.
+          // This must override it so sent selection XML is presented as a chip.
+          priority: 100,
           locale: 'conversation',
       },
       SentUserMessageView,
@@ -430,7 +432,9 @@ export function apply(ctx: ClientContext): void {
         {
           name: 'conversation.chat.node',
           key: 'steering',
-          priority: -1,
+          // Steering messages use the same serialized envelope and need the
+          // same renderer override.
+          priority: 100,
           locale: 'conversation',
       },
       SentSteeringMessageView,
