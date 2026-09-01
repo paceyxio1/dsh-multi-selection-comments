@@ -178,7 +178,7 @@ function PendingCommentsDock({ sessionId, inputActions, useInput }: PendingComme
     closeTimerRef.current = setTimeout(() => {
       closeTimerRef.current = null
       setDetailsVisible(false)
-    }, 240)
+    }, 120)
   }, [])
   commentsRef.current = comments
   inputRef.current = input
