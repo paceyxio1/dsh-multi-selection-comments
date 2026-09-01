@@ -56,5 +56,8 @@ assert.match(clientSource, /key: 'steering',[\s\S]*?priority: -100/)
 assert.match(clientSource, /dqt-sent-annotations" onMouseEnter/)
 assert.doesNotMatch(clientSource, /className="dqt-sent-chip"[^>]*onClick/)
 assert.match(clientSource, /\.dqt-sent-card\{position:absolute/)
+assert.match(clientSource, /dqt-pending-annotations" onMouseEnter/)
+assert.doesNotMatch(clientSource, /className="dqt-chip-main"[^>]*onClick/)
+assert.match(clientSource, /\.dqt-pending-annotations\{position:relative/)
 
 console.log('selection comment formatting tests passed')
