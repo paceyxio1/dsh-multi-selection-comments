@@ -53,5 +53,8 @@ assert.deepEqual(module.parseSubmission(optionalRequirement).comments[0], {
 })
 assert.match(clientSource, /key: 'user',[\s\S]*?priority: -100/)
 assert.match(clientSource, /key: 'steering',[\s\S]*?priority: -100/)
+assert.match(clientSource, /dqt-sent-annotations" onMouseEnter/)
+assert.doesNotMatch(clientSource, /className="dqt-sent-chip"[^>]*onClick/)
+assert.match(clientSource, /\.dqt-sent-card\{position:absolute/)
 
 console.log('selection comment formatting tests passed')
