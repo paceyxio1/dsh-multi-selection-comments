@@ -165,12 +165,31 @@ function PendingCommentsDock({ sessionId, inputActions, useInput }: PendingComme
   const [detailsVisible, setDetailsVisible] = useState(false)
   const commentsRef = useRef(comments)
   const inputRef = useRef(input)
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const showDetails = useCallback(() => {
+    if (closeTimerRef.current !== null) {
+      clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
+    }
+    setDetailsVisible(true)
+  }, [])
+  const hideDetailsSoon = useCallback(() => {
+    if (closeTimerRef.current !== null) clearTimeout(closeTimerRef.current)
+    closeTimerRef.current = setTimeout(() => {
+      closeTimerRef.current = null
+      setDetailsVisible(false)
+    }, 240)
+  }, [])
   commentsRef.current = comments
   inputRef.current = input
 
   useEffect(() => {
     if (comments.length === 0) setDetailsVisible(false)
   }, [comments.length])
+
+  useEffect(() => () => {
+    if (closeTimerRef.current !== null) clearTimeout(closeTimerRef.current)
+  }, [])
 
   // DSH disables its native Send control when draft.trim() is empty. Keep one
   // invisible UI-only character while selections are pending, then remove it
@@ -229,9 +248,9 @@ function PendingCommentsDock({ sessionId, inputActions, useInput }: PendingComme
 
   return (
     <div className="dqt-dock">
-      <div className="dqt-pending-annotations" onMouseEnter={() => setDetailsVisible(true)} onMouseLeave={() => setDetailsVisible(false)} onFocus={() => setDetailsVisible(true)} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setDetailsVisible(false) }}>
+      <div className="dqt-pending-annotations" onMouseEnter={showDetails} onMouseLeave={hideDetailsSoon} onFocus={showDetails} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) hideDetailsSoon() }}>
       {detailsVisible ? (
-        <div className="dqt-details" role="dialog" aria-label={chinese ? '待发送的选中内容' : 'Pending comments'}>
+        <div className="dqt-details" role="dialog" aria-label={chinese ? '待发送的选中内容' : 'Pending comments'} onMouseEnter={showDetails} onMouseLeave={hideDetailsSoon}>
           {comments.map((comment, index) => (
             <div className="dqt-detail-row" key={comment.id}>
               <span className="dqt-detail-index">{index + 1}.</span>

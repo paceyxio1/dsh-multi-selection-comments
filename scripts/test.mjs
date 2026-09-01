@@ -59,5 +59,8 @@ assert.match(clientSource, /\.dqt-sent-card\{position:absolute/)
 assert.match(clientSource, /dqt-pending-annotations" onMouseEnter/)
 assert.doesNotMatch(clientSource, /className="dqt-chip-main"[^>]*onClick/)
 assert.match(clientSource, /\.dqt-pending-annotations\{position:relative/)
+assert.match(clientSource, /const hideDetailsSoon = useCallback/)
+assert.match(clientSource, /setTimeout\(\(\) => \{[\s\S]*?\}, 240\)/)
+assert.match(clientSource, /dqt-details"[^>]*onMouseEnter=\{showDetails\}/)
 
 console.log('selection comment formatting tests passed')
