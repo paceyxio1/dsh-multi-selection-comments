@@ -4,7 +4,7 @@ English | [简体中文](README.md)
 
 Bring Codex-style multiple, independent selection comments to DeepSeek Harness (DSH).
 
-Select several passages from assistant responses or tool output, write a separate comment for each selection, and send them together as structured context with your main message—without cluttering the composer.
+Select several passages from an AI's final response, write a separate comment for each selection, and send them together as structured context with your main message—without cluttering the composer. Think reasoning, tool output, and non-AI messages never trigger the popup.
 
 ## Preview
 
@@ -27,7 +27,7 @@ Select several passages from assistant responses or tool output, write a separat
 - Submit selections even when the main composer is otherwise empty.
 - Inject structured comment context only when the main message is submitted.
 - Render sent comments as a right-aligned annotation capsule instead of exposing raw XML.
-- Ignore selections inside user messages, inputs, editable regions, and steering messages.
+- Trigger only in final AI output; ignore Think reasoning, tool output, user messages, inputs, editable regions, and steering messages.
 - Follow the DSH page language for Chinese and English UI labels.
 
 ## Windows Installation
@@ -64,7 +64,7 @@ When upgrading from `dsh-plugin-quote-to-chat`, uninstall the legacy plugin in D
 
 ## Usage
 
-1. Select a passage in an assistant response or tool output.
+1. Select a passage in an AI's final response (Think reasoning and tool output are unsupported).
 2. Enter a comment for that passage and choose “Add to conversation.”
 3. Repeat for other passages; a comment-count capsule appears above the composer.
 4. Write your main message and submit it normally.

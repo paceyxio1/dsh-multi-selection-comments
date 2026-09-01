@@ -302,8 +302,9 @@ function selectionContext(selection: Selection): { text: string; rect: DOMRect }
   const row = element?.closest<HTMLElement>('[data-chat-flow-kind]')
   const inConversation = Boolean(element?.closest('[data-conversation-scroll]'))
   const kind = row?.dataset.chatFlowKind
-  if (!element || !row || !inConversation || kind === 'user' || kind === 'steering') return null
+  if (!element || !row || !inConversation || kind !== 'assistant-step') return null
   if (element.closest(`.${POPUP_CLASS}, input, textarea, [contenteditable="true"]`)) return null
+  if ([...row.querySelectorAll<HTMLElement>('[data-variant="think"]')].some((think) => range.intersectsNode(think))) return null
   const rect = range.getBoundingClientRect()
   if (rect.width === 0 && rect.height === 0) return null
   return { text, rect }
