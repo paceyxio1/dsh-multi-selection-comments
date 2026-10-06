@@ -90,7 +90,7 @@ npm run build
 
 ## 兼容性
 
-插件使用 DSH Web 的 `conversation.input.dock` 插槽，并依赖会话 DOM 上的 `data-conversation-scroll` 与 `data-chat-flow-kind` 标记。已使用 DSH `0.1.0-rc.6` 客户端包进行类型检查。
+插件使用 DSH Web 的 `conversation.input.dock` 插槽，并依赖会话 DOM 上的 `data-conversation-scroll` 与 `data-chat-flow-kind` 标记。使用 DSH `0.1.0-rc.6` 客户端包进行类型检查，同时兼容 DSH `0.2.0-rc.2` 的会话选择接口与独立 snapshot store 模块。新版通过 `uiSession.adapter.current` 获取当前会话，旧版保留 `sessions.list.current` 回退。
 
 ## License
 

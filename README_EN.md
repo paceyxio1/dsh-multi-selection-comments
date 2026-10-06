@@ -92,6 +92,8 @@ Build artifacts are `dist/index.js` (server entry) and `client.js` (DSH Web clie
 
 The plugin uses DSH Web's `conversation.input.dock` slot and relies on the `data-conversation-scroll` and `data-chat-flow-kind` markers in the conversation DOM. It is type-checked against the DSH `0.1.0-rc.6` client packages.
 
+DSH 0.2 compatibility: the selected session is read from `uiSession.adapter.current`, with a `sessions.list.current` fallback for DSH 0.1. The client loader supports both the standalone snapshot store module and the older client runtime export.
+
 ## License
 
 [MIT](LICENSE)

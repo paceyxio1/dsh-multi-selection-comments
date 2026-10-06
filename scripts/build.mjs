@@ -41,6 +41,15 @@ const body = readFileSync(temporaryClient, 'utf8')
 const wrapped = `window.__ModuleLoader__.load({
   id: ${JSON.stringify(packageName)},
   factory: function (require) {
+    // DSH 0.2 moved snapshot stores out of client-runtime. Keep 0.1 support.
+    var hostRequire = require;
+    require = function (id) {
+      if (id === '@deepseek-ai/dsh-client-runtime/client') {
+        try { return hostRequire('@deepseek-ai/dsh-client-store'); }
+        catch (_) { return hostRequire(id); }
+      }
+      return hostRequire(id);
+    };
     var module = { exports: {} };
     var exports = module.exports;
     (function (module, exports, require) {

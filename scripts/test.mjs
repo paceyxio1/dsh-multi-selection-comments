@@ -10,6 +10,28 @@ const js = ts.transpileModule(source, {
 }).outputText
 const module = await import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`)
 
+const sessionSource = readFileSync(join(process.cwd(), 'src/client/current-session.ts'), 'utf8')
+const sessionJs = ts.transpileModule(sessionSource, {
+  compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
+}).outputText
+const { currentSessionId } = await import(`data:text/javascript;base64,${Buffer.from(sessionJs).toString('base64')}`)
+const legacy = { reflect: { get: () => undefined }, sessions: { list: { getSnapshot: () => ({ current: 'old-session' }) } } }
+assert.equal(currentSessionId(legacy), 'old-session')
+let selected = 'new-session'
+const modern = new Proxy({ ...legacy, reflect: { get: (name) => {
+  assert.equal(name, 'uiSession')
+  return { adapter: { current: { getSnapshot: () => ({ key: selected }) } } }
+} } }, { get(target, key) {
+  if (key === 'uiSession') throw new Error('cannot get property "uiSession" without inject')
+  return Reflect.get(target, key)
+} })
+assert.equal(currentSessionId(modern), 'new-session')
+selected = 'switched-session'
+assert.equal(currentSessionId(modern), 'switched-session')
+selected = undefined
+assert.equal(currentSessionId(modern), undefined)
+assert.equal(currentSessionId({ reflect: legacy.reflect, sessions: { list: { getSnapshot: () => ({}) } } }), undefined)
+
 const comments = [
   { id: '1', selectedText: '包含独立的 []', userComment: '要求1' },
   { id: '2', selectedText: '安装脚本', userComment: '要求2' },
