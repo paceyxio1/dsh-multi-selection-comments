@@ -73,6 +73,47 @@ assert.deepEqual(module.parseSubmission(optionalRequirement).comments[0], {
   selectedText: '只引用这段',
   userComment: '',
 })
+
+// Sidebar quotes carry the file they came from; transcript quotes stay unchanged.
+const sourced = module.composeSubmission('', [
+  { id: 'src', selectedText: 'const a = 1', userComment: '这里为什么改', source: '~/proj/src/a.ts' },
+])
+assert.match(sourced, /<source>~\/proj\/src\/a\.ts<\/source>/)
+assert.deepEqual(module.parseSubmission(sourced).comments[0], {
+  id: 'sent-1',
+  selectedText: 'const a = 1',
+  userComment: '这里为什么改',
+  source: '~/proj/src/a.ts',
+})
+assert.doesNotMatch(module.composeSubmission('', comments), /<source>/)
+assert.equal(Object.hasOwn(module.parseSubmission(composed).comments[0], 'source'), false)
+assert.equal(module.parseSubmission(module.composeSubmission('', [
+  { id: 'x', selectedText: 'a & b', userComment: '', source: 'C:\\a&b\\c.ts' },
+])).comments[0].source, 'C:\\a&b\\c.ts')
+
+// The sidebar gate must cover the right Sidebar's previews, change review and file tree.
+assert.match(clientSource, /const SIDEBAR_TEXT_SELECTOR = \[/)
+for (const marker of [
+  'data-document-preview',
+  'data-textpreview-body',
+  'data-document-markdown',
+  'data-code-preview',
+  'data-html-preview',
+  'data-image-preview',
+  'data-files-body',
+  'data-changes-review',
+  'data-review-view',
+  'data-diff-line',
+]) {
+  assert.ok(clientSource.includes(`'[${marker}]'`), `sidebar selector is missing ${marker}`)
+}
+assert.match(clientSource, /data-textpreview-path/)
+assert.match(clientSource, /data-files-path/)
+assert.match(clientSource, /data-review-file/)
+assert.match(clientSource, /addPendingComment\(sessionId, text, input\.value, source\)/)
+assert.match(clientSource, /show\(context\.text, context\.rect, context\.source\)/)
+assert.match(clientSource, /\.dqt-popup-source\{/)
+assert.match(clientSource, /\.dqt-detail-source\{/)
 assert.match(clientSource, /key: 'user',[\s\S]*?priority: -100/)
 assert.match(clientSource, /key: 'steering',[\s\S]*?priority: -100/)
 assert.match(clientSource, /dqt-sent-annotations" onMouseEnter/)

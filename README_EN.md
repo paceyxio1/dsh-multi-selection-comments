@@ -4,7 +4,7 @@ English | [简体中文](README.md)
 
 Bring Codex-style multiple, independent selection comments to DeepSeek Harness (DSH).
 
-Select several passages from an AI's final response, write a separate comment for each selection, and send them together as structured context with your main message—without cluttering the composer. Think reasoning, tool output, and non-AI messages never trigger the popup.
+Select several passages from an AI's final response—or from a file preview open in the Sidebar—write a separate comment for each selection, and send them together as structured context with your main message, without cluttering the composer. Think reasoning, tool output, and non-AI messages never trigger the popup.
 
 ## Preview
 
@@ -20,6 +20,8 @@ Select several passages from an AI's final response, write a separate comment fo
 
 - Codex-inspired selection commenting: select text and comment directly on that passage.
 - Add multiple comments in sequence; every “selected text + user comment” pair stays independent.
+- Comment on Sidebar file previews too: text/diff, Markdown, code, HTML, and image previews, the per-turn change review, plus the workspace file tree.
+- Sidebar quotes automatically carry the file path, so the model knows which document the passage came from.
 - Keep the composer clean with a compact “N comments” capsule instead of stacked blockquotes.
 - Open the capsule to review or remove individual comments; click outside the panel to close it.
 - Press Enter to add a selection to the conversation; use Ctrl/Command+Enter for a newline.
@@ -64,8 +66,8 @@ When upgrading from `dsh-plugin-quote-to-chat`, uninstall the legacy plugin in D
 
 ## Usage
 
-1. Select a passage in an AI's final response (Think reasoning and tool output are unsupported).
-2. Enter a comment for that passage and choose “Add to conversation.”
+1. Select a passage in an AI's final response (Think reasoning and tool output are unsupported); selecting inside a Sidebar file preview opens the same popup.
+2. Enter a comment for that passage and choose “Add to conversation.” Sidebar quotes also show a “Source: <file path>” line.
 3. Repeat for other passages; a comment-count capsule appears above the composer.
 4. Write your main message and submit it normally.
 
@@ -90,7 +92,7 @@ Build artifacts are `dist/index.js` (server entry) and `client.js` (DSH Web clie
 
 ## Compatibility
 
-The plugin uses DSH Web's `conversation.input.dock` slot and relies on the `data-conversation-scroll` and `data-chat-flow-kind` markers in the conversation DOM. It is type-checked against the DSH `0.1.0-rc.6` client packages.
+The plugin uses DSH Web's `conversation.input.dock` slot and relies on the `data-conversation-scroll` and `data-chat-flow-kind` markers in the conversation DOM. Sidebar commenting relies on the right Sidebar preview markers `data-document-preview`, `data-textpreview-body`, `data-document-markdown`, `data-code-preview`, `data-html-preview`, and `data-image-preview`, the change review markers `data-changes-review`, `data-review-view`, and `data-diff-line`, plus `data-files-body` for the workspace file tree; if those markers disappear, Sidebar commenting silently stops working while transcript commenting is unaffected. It is type-checked against the DSH `0.1.0-rc.6` client packages.
 
 DSH 0.2 compatibility: the selected session is read from `uiSession.adapter.current`, with a `sessions.list.current` fallback for DSH 0.1. The client loader supports both the standalone snapshot store module and the older client runtime export.
 

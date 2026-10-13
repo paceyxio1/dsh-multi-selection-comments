@@ -4,7 +4,7 @@
 
 为 DeepSeek Harness（DSH）带来仿 Codex 的“多段选中文本、逐条提出要求”体验。
 
-你可以在 AI 的正式回复中连续选择多段文字，分别写下后续要求，再把它们作为一组结构化上下文随主消息一起发送。Think 思考过程、工具输出和非 AI 消息不会触发。主输入框始终保持简洁。
+你可以在 AI 的正式回复中连续选择多段文字，也可以直接在侧栏打开的文件预览里划词，分别写下后续要求，再把它们作为一组结构化上下文随主消息一起发送。Think 思考过程、工具输出和非 AI 消息不会触发。主输入框始终保持简洁。
 
 ## 界面预览
 
@@ -20,6 +20,8 @@
 
 - 仿 Codex 的选区交互：选中文字后直接填写对该段内容的后续要求。
 - 支持连续选择多段内容，每条“所选文本 + 你的要求”彼此独立。
+- 侧栏文件预览（文本/差异、Markdown、代码、HTML、图片）、本轮改动差异面板与文件树同样支持划词提问。
+- 来自侧栏的引用会自动附上文件路径，AI 能知道这段内容出自哪个文件。
 - 主输入框上方只显示紧凑的“N 条选中内容”胶囊，不再堆叠多段引用正文。
 - 点击胶囊可查看全部选中内容、逐条删除；点击弹窗外部可收起详情。
 - 要求输入框中按 Enter 直接添加到对话，按 Ctrl+Enter 换行。
@@ -64,8 +66,8 @@ dsh --profile web --dump-config | Select-String dsh-plugin-multi-selection-comme
 
 ## 使用方法
 
-1. 在 AI 的正式回复中选中一段文字（Think 思考过程和工具输出不支持）。
-2. 在弹窗的“你的要求”中输入对 AI 的后续要求，然后点击“添加到对话”。
+1. 在 AI 的正式回复中选中一段文字（Think 思考过程和工具输出不支持）；在侧栏文件预览里划词同样会弹出小窗。
+2. 在弹窗的“你的要求”中输入对 AI 的后续要求，然后点击“添加到对话”。侧栏引用会额外显示一行“来源：<文件路径>”。
 3. 对其他文字重复操作；输入框上方会显示选中内容数量胶囊。
 4. 在主输入框中填写你的正文并发送。
 
@@ -90,7 +92,7 @@ npm run build
 
 ## 兼容性
 
-插件使用 DSH Web 的 `conversation.input.dock` 插槽，并依赖会话 DOM 上的 `data-conversation-scroll` 与 `data-chat-flow-kind` 标记。使用 DSH `0.1.0-rc.6` 客户端包进行类型检查，同时兼容 DSH `0.2.0-rc.2` 的会话选择接口与独立 snapshot store 模块。新版通过 `uiSession.adapter.current` 获取当前会话，旧版保留 `sessions.list.current` 回退。
+插件使用 DSH Web 的 `conversation.input.dock` 插槽，并依赖会话 DOM 上的 `data-conversation-scroll` 与 `data-chat-flow-kind` 标记。侧栏划词依赖右侧栏文件预览的 `data-document-preview`、`data-textpreview-body`、`data-document-markdown`、`data-code-preview`、`data-html-preview`、`data-image-preview`，本轮改动差异面板的 `data-changes-review`、`data-review-view`、`data-diff-line`，以及文件树的 `data-files-body` 标记；这些标记缺失时侧栏划词会静默失效，会话内划词不受影响。使用 DSH `0.1.0-rc.6` 客户端包进行类型检查，同时兼容 DSH `0.2.0-rc.2` 的会话选择接口与独立 snapshot store 模块。新版通过 `uiSession.adapter.current` 获取当前会话，旧版保留 `sessions.list.current` 回退。
 
 ## License
 

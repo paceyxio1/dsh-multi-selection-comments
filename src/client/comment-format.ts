@@ -2,6 +2,8 @@ export interface SelectionComment {
   id: string
   selectedText: string
   userComment: string
+  /** Workspace file a sidebar quote came from, when the selection had one. */
+  source?: string
 }
 
 const START_MARKER = '<selection_comments>'
@@ -40,12 +42,16 @@ function unescapeXml(value: string): string {
 /** Serialize pending UI comments only at submit time, leaving the visible draft clean. */
 export function composeSubmission(draft: string, comments: readonly SelectionComment[]): string {
   if (comments.length === 0) return draft
-  const rows = comments.map((comment, index) => [
-    `  <comment index="${index + 1}">`,
-    `    <selected_text>${escapeXml(comment.selectedText.trim())}</selected_text>`,
-    `    <user_comment>${escapeXml(comment.userComment.trim())}</user_comment>`,
-    '  </comment>',
-  ].join('\n'))
+  const rows = comments.map((comment, index) => {
+    const source = comment.source?.trim()
+    return [
+      `  <comment index="${index + 1}">`,
+      ...(source ? [`    <source>${escapeXml(source)}</source>`] : []),
+      `    <selected_text>${escapeXml(comment.selectedText.trim())}</selected_text>`,
+      `    <user_comment>${escapeXml(comment.userComment.trim())}</user_comment>`,
+      '  </comment>',
+    ].join('\n')
+  })
   const context = [START_MARKER, ...rows, END_MARKER].join('\n')
   return draft.trim() ? `${context}\n\n${draft.trimEnd()}` : context
 }
@@ -57,13 +63,18 @@ export function parseSubmission(value: string): ParsedSubmission | null {
   if (start < 0 || end < 0 || value.slice(0, start).trim()) return null
   const envelope = value.slice(start + START_MARKER.length, end)
   const comments: SelectionComment[] = []
-  const pattern = /<comment\s+index="(\d+)">\s*<selected_text>([\s\S]*?)<\/selected_text>\s*<user_comment>([\s\S]*?)<\/user_comment>\s*<\/comment>/g
+  // The source element is optional so envelopes written by older versions, and
+  // quotes taken from the transcript, keep parsing exactly as before.
+  const pattern = /<comment\s+index="(\d+)">\s*(?:<source>([\s\S]*?)<\/source>\s*)?<selected_text>([\s\S]*?)<\/selected_text>\s*<user_comment>([\s\S]*?)<\/user_comment>\s*<\/comment>/g
   for (const match of envelope.matchAll(pattern)) {
-    comments.push({
+    const comment: SelectionComment = {
       id: `sent-${match[1] ?? comments.length + 1}`,
-      selectedText: unescapeXml(match[2] ?? '').trim(),
-      userComment: unescapeXml(match[3] ?? '').trim(),
-    })
+      selectedText: unescapeXml(match[3] ?? '').trim(),
+      userComment: unescapeXml(match[4] ?? '').trim(),
+    }
+    const source = match[2] === undefined ? '' : unescapeXml(match[2]).trim()
+    if (source) comment.source = source
+    comments.push(comment)
   }
   if (comments.length === 0) return null
   return {
