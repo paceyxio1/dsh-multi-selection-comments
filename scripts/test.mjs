@@ -114,6 +114,36 @@ assert.match(clientSource, /addPendingComment\(sessionId, text, input\.value, so
 assert.match(clientSource, /show\(context\.text, context\.rect, context\.source\)/)
 assert.match(clientSource, /\.dqt-popup-source\{/)
 assert.match(clientSource, /\.dqt-detail-source\{/)
+
+// DSH 0.2's composer is a Lexical contenteditable, and both Enter and the
+// primary Send button route through the package-internal keyboard facade
+// rather than inputActions.submit. The compose therefore has to be
+// intercepted in the capture phase, and the old textarea assumption is gone.
+assert.match(clientSource, /document\.addEventListener\('keydown', onKeyDown, true\)/)
+assert.match(clientSource, /document\.addEventListener\('click', onClick, true\)/)
+assert.match(clientSource, /document\.removeEventListener\('click', onClick, true\)/)
+assert.match(clientSource, /Array\.from\(button\.classList\)\.some\(\(name\) => name\.endsWith\('_primary'\)\)/)
+assert.match(clientSource, /target\.closest\('\[data-composer-card\]'\)/)
+assert.doesNotMatch(clientSource, /instanceof HTMLTextAreaElement/)
+// The compose is one-shot, and the sentinel sweep must never eat an envelope.
+assert.match(clientSource, /if \(preparedRef\.current\) return false/)
+assert.match(clientSource, /preparedRef\.current = true/)
+assert.match(clientSource, /hasSentinel && !input\.draft\.includes\(START_MARKER\)/)
+assert.equal(module.START_MARKER, '<selection_comments>')
+assert.match(module.composeSubmission('', [{ id: 'a', selectedText: 'x', userComment: 'y' }]),
+  new RegExp(`^${module.START_MARKER}`))
+
+// Every menu-filled surface must force an opaque background. DSH resolves
+// --dsw-specific-menu to --dsw-menu-surface-fill (#f8f9fa94, ~58% opaque) and
+// pairs that translucent fill with a backdrop blur these panels do not have,
+// so inheriting it raw makes the text behind them bleed through.
+const opaqueMenuFill = /background:#fff;background:rgb\(from var\(--dsw-specific-menu,#fff\) r g b \/ 1\)/g
+assert.equal((clientSource.match(opaqueMenuFill) ?? []).length, 3,
+  'the popup, the pending details panel and the sent card must all force an opaque background')
+assert.match(clientSource, /\.dqt-details\{[^}]*background:#fff;background:rgb\(/)
+assert.match(clientSource, /\.dqt-sent-card\{[^}]*background:#fff;background:rgb\(/)
+assert.doesNotMatch(clientSource, /border-radius:15px;background:var\(--dsw-specific-menu/)
+
 assert.match(clientSource, /key: 'user',[\s\S]*?priority: -100/)
 assert.match(clientSource, /key: 'steering',[\s\S]*?priority: -100/)
 assert.match(clientSource, /dqt-sent-annotations" onMouseEnter/)
@@ -125,5 +155,48 @@ assert.match(clientSource, /\.dqt-pending-annotations\{position:relative/)
 assert.match(clientSource, /const hideDetailsSoon = useCallback/)
 assert.match(clientSource, /setTimeout\(\(\) => \{[\s\S]*?\}, 120\)/)
 assert.match(clientSource, /dqt-details"[^>]*onMouseEnter=\{showDetails\}/)
+
+// Sidebar browser annotation. The guest script is embedded with String.raw, so
+// the test also guards the two characters that would end the template early.
+const browserSource = readFileSync(join(process.cwd(), 'src/client/browser-annotator.ts'), 'utf8')
+assert.match(browserSource, /export const BROWSER_ANNOTATION_MARKER = '__DSH_ANNOT__'/)
+assert.match(browserSource, /const ANNOTATOR_SOURCE = String\.raw`/)
+assert.match(browserSource, /const FRAME_SELECTOR = '\[data-sidebar-browser-frame\]'/)
+assert.match(browserSource, /const ADDRESS_SELECTOR = '\[class\*="_addressBox"\]'/)
+assert.match(browserSource, /executeJavaScript/)
+assert.match(browserSource, /addEventListener\('console-message', onConsole\)/)
+assert.match(browserSource, /addEventListener\('dom-ready'/)
+assert.match(browserSource, /new MutationObserver\(schedule\)/)
+assert.match(browserSource, /insertAdjacentElement\('afterend', button\)/)
+// The injected picker must cover both element picking and text selection.
+assert.match(browserSource, /function elementPayload/)
+assert.match(browserSource, /function textPayload/)
+assert.match(browserSource, /function selectorFor/)
+assert.match(browserSource, /function outline/)
+assert.match(browserSource, /adoptedStyleSheets/)
+// The chrome button is an icon (a chat bubble), not a word: the English label
+// was too wide for the address-bar row.
+assert.match(browserSource, /const ANNOTATE_ICON = \[/)
+assert.match(browserSource, /state\.button\.innerHTML = ANNOTATE_ICON/)
+assert.doesNotMatch(browserSource, /state\.button\.textContent = label/)
+assert.match(browserSource, /\.\$\{BUTTON_CLASS\}\[aria-pressed="true"\]/)
+const guestStart = 'const ANNOTATOR_SOURCE = String.raw`'
+const guestBody = browserSource.slice(
+  browserSource.indexOf(guestStart) + guestStart.length,
+  browserSource.indexOf('})();`'),
+)
+assert.ok(guestBody.length > 1000, 'the injected guest script must be embedded in full')
+assert.ok(!guestBody.includes('\u0060'), 'the guest script must not contain a backtick')
+assert.ok(!guestBody.includes('${'), 'the guest script must not contain a template placeholder')
+
+// Shared locale helper, and the dock wiring that feeds page annotations into
+// the same pending list as transcript quotes.
+const localeSource = readFileSync(join(process.cwd(), 'src/client/locale.ts'), 'utf8')
+assert.match(localeSource, /export function isChinese\(\): boolean/)
+assert.match(localeSource, /document\.documentElement\.lang/)
+assert.match(clientSource, /import \{ isChinese \} from '\.\/locale\.ts'/)
+assert.doesNotMatch(clientSource, /function isChinese\(\): boolean \{/)
+assert.match(clientSource, /installBrowserAnnotator\(/)
+assert.match(clientSource, /addPendingComment\(sessionId as SessionId, selectedText, userComment, source\)/)
 
 console.log('selection comment formatting tests passed')

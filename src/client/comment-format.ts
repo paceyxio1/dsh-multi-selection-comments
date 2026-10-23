@@ -6,7 +6,7 @@ export interface SelectionComment {
   source?: string
 }
 
-const START_MARKER = '<selection_comments>'
+export const START_MARKER = '<selection_comments>'
 const END_MARKER = '</selection_comments>'
 export const EMPTY_DRAFT_SENTINEL = '\u2063'
 
