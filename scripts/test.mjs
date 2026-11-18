@@ -110,7 +110,8 @@ for (const marker of [
 assert.match(clientSource, /data-textpreview-path/)
 assert.match(clientSource, /data-files-path/)
 assert.match(clientSource, /data-review-file/)
-assert.match(clientSource, /addPendingComment\(sessionId, text, input\.value, source\)/)
+assert.match(clientSource, /addPendingComment\(target, text, input\.value, source\)/)
+assert.match(clientSource, /\(currentSessionId\(ctx\) as SessionId \| undefined\) \?\? sessionId/)
 assert.match(clientSource, /show\(context\.text, context\.rect, context\.source\)/)
 assert.match(clientSource, /\.dqt-popup-source\{/)
 assert.match(clientSource, /\.dqt-detail-source\{/)
@@ -138,22 +139,56 @@ assert.match(module.composeSubmission('', [{ id: 'a', selectedText: 'x', userCom
 // pairs that translucent fill with a backdrop blur these panels do not have,
 // so inheriting it raw makes the text behind them bleed through.
 const opaqueMenuFill = /background:#fff;background:rgb\(from var\(--dsw-specific-menu,#fff\) r g b \/ 1\)/g
-assert.equal((clientSource.match(opaqueMenuFill) ?? []).length, 3,
-  'the popup, the pending details panel and the sent card must all force an opaque background')
+assert.equal((clientSource.match(opaqueMenuFill) ?? []).length, 4,
+  'the popup, the pending details panel, the sent card and the body-level fallback layer must all force an opaque background')
 assert.match(clientSource, /\.dqt-details\{[^}]*background:#fff;background:rgb\(/)
 assert.match(clientSource, /\.dqt-sent-card\{[^}]*background:#fff;background:rgb\(/)
 assert.doesNotMatch(clientSource, /border-radius:15px;background:var\(--dsw-specific-menu/)
 
 assert.match(clientSource, /key: 'user',[\s\S]*?priority: -100/)
 assert.match(clientSource, /key: 'steering',[\s\S]*?priority: -100/)
-assert.match(clientSource, /dqt-sent-annotations" onMouseEnter/)
+// A crashed keyed renderer abdicates the seat back to the built-in one, which
+// prints the raw XML envelope — the renderer must be crash-proof and a DOM
+// fallback must repair any envelope that still leaks into a sent row.
+assert.match(clientSource, /const blocks = Array\.isArray\(content\) \? content : \[\]/)
+assert.match(clientSource, /node\?\.data\?\.content/)
+assert.match(clientSource, /function installSentEnvelopeFallback/)
+assert.match(clientSource, /ctx\.effect\(\(\) => installSentEnvelopeFallback\(\)/)
+assert.match(clientSource, /\[data-chat-flow-kind="user"\], \[data-chat-flow-kind="steering"\]/)
+assert.match(clientSource, /onEntryError/)
+assert.match(clientSource, /dqt-hover-bridge" onMouseEnter/)
+assert.match(clientSource, /dqt-pending-annotations dqt-hover-bridge" onMouseEnter/)
 assert.doesNotMatch(clientSource, /className="dqt-sent-chip"[^>]*onClick/)
 assert.match(clientSource, /\.dqt-sent-card\{position:absolute/)
-assert.match(clientSource, /dqt-pending-annotations" onMouseEnter/)
 assert.doesNotMatch(clientSource, /className="dqt-chip-main"[^>]*onClick/)
 assert.match(clientSource, /\.dqt-pending-annotations\{position:relative/)
 assert.match(clientSource, /const hideDetailsSoon = useCallback/)
-assert.match(clientSource, /setTimeout\(\(\) => \{[\s\S]*?\}, 120\)/)
+// React hooks rules: the empty-composer early return must sit AFTER every hook
+// in the dock, or the first pending comment crashes the dock ("rendered more
+// hooks") and abdicates the seat — the chip then never appears.
+assert.match(clientSource, /const dockRootRef = useRef<HTMLDivElement \| null>\(null\)[\s\S]*?if \(comments\.length === 0\) return null/)
+assert.doesNotMatch(clientSource, /if \(comments\.length === 0\) return null[\s\S]*?useRef\(/)
+// Hover details must survive the trip from the chip up to the card: an invisible
+// bridge strip closes the 8px positioning gap, and the hide delay tolerates
+// diagonal paths and scrollbar drags that briefly slip off the card.
+assert.match(clientSource, /setTimeout\(\(\) => \{[\s\S]*?\}, 250\)/)
+assert.match(clientSource, /\.dqt-hover-bridge::after\{content:'';position:absolute;left:-6px;right:-6px;top:-10px;height:12px;pointer-events:none\}/)
+assert.match(clientSource, /\.dqt-hover-bridge:hover::after\{pointer-events:auto\}/)
+// The fallback card must live under document.body (message rows are React-
+// managed and hover-driven re-renders used to rip the card out from under the
+// pointer), share a grace timer across the chip and the card, and re-assert
+// visibility through the pointerover keep-alive.
+assert.match(clientSource, /\.dqt-sent-card-layer\{position:fixed;z-index:2147483000/)
+assert.match(clientSource, /function showSentCardLayer/)
+assert.match(clientSource, /document\.body\.appendChild\(layer\)/)
+assert.match(clientSource, /chip\.addEventListener\('mouseleave', hideSentCardSoon\)/)
+assert.match(clientSource, /layer\.addEventListener\('mouseenter', cancelSentCardHide\)/)
+assert.match(clientSource, /relatedTarget instanceof Node && event\.currentTarget\.contains\(event\.relatedTarget\)/)
+assert.match(clientSource, /addEventListener\('pointerover', onPointerOver, true\)/)
+assert.match(clientSource, /root\.dispatchEvent\(new CustomEvent\(HOVER_KEEP_EVENT\)\)/)
+assert.match(clientSource, /dqt-pending-annotations dqt-hover-bridge/)
+assert.match(clientSource, /dqt-sent-annotations dqt-hover-bridge/)
+assert.match(clientSource, /'dqt-sent-annotations dqt-hover-bridge'/)
 assert.match(clientSource, /dqt-details"[^>]*onMouseEnter=\{showDetails\}/)
 
 // Sidebar browser annotation. The guest script is embedded with String.raw, so
