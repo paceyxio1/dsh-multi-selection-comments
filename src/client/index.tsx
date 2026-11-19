@@ -43,18 +43,15 @@ const SIDEBAR_TEXT_SELECTOR = [
 
 interface PendingState {
   bySession: Record<string, SelectionComment[]>
-  /** Why the keyed sent-bubble override last fell back, shown once in the dock. */
-  entryError?: string | null
 }
 
-const pendingStore = createSnapshotStore<PendingState>({ bySession: {}, entryError: null })
+const pendingStore = createSnapshotStore<PendingState>({ bySession: {} })
 
 function reportSentFallback(reason: string): void {
-  pendingStore.update((state) => {
-    if (state.entryError === reason) return
-    state.entryError = reason
-  })
-  console.error('[multi-selection-comments]', reason)
+  // The keyed sent-bubble override does not win the seat in current DSH builds;
+  // the DOM fallback is the designed rendering path. Keep a console trace for
+  // future diagnosis, but never nag the user about a working repair.
+  console.info('[multi-selection-comments]', reason)
 }
 
 function sessionKey(sessionId: SessionId): string {
@@ -606,11 +603,6 @@ function PendingCommentsDock({ sessionId, inputActions, useInput }: PendingComme
 
   return (
     <div ref={dockRootRef} className="dqt-dock">
-      {state.entryError ? (
-        <div className="dqt-diag" title={state.entryError}>
-          {chinese ? '⚠ 划词发送卡片渲染异常，已启用兜底显示（悬停查看详情）' : '⚠ Sent-annotation card fell back (hover for details)'}
-        </div>
-      ) : null}
       {comments.length === 0 && foreignPending.length > 0 ? (
         <div className="dqt-diag" title={foreignPending.map(([key, list]) => `${key}: ${list.length}`).join('\n')}>
           {chinese
